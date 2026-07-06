@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ['mqtt', 'bcryptjs', 'firebase-admin'],
+  allowedDevOrigins: ['192.168.1.128'],
+  devIndicators: {
+    position: 'top-right',
+  },
 };
 
 export default nextConfig;
