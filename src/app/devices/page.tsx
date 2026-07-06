@@ -6,6 +6,7 @@ import StatusBadge from '@/components/StatusBadge'
 import UpdateDeviceModal from '@/components/UpdateDeviceModal'
 import { Search, Plus, Trash2, Eye, Settings, RefreshCw, Filter } from 'lucide-react'
 import Link from 'next/link'
+import { formatSpeed } from '@/lib/format'
 
 interface Device {
   id: string
@@ -158,7 +159,7 @@ export default function DevicesPage() {
                       <td style={{ color: 'var(--text-secondary)' }}>{device.vehicle_type || '—'}</td>
                       <td><StatusBadge status={device.status} /></td>
                       <td style={{ color: device.last_speed && device.last_speed > 0 ? '#34d399' : 'var(--text-muted)', fontWeight: 600 }}>
-                        {device.last_speed ? `${Math.round(device.last_speed)} km/h` : '—'}
+                        {device.last_speed != null ? formatSpeed(device.last_speed) : '—'}
                       </td>
                       <td>
                         <code style={{ fontSize: '0.7rem', color: 'var(--text-muted)', background: 'var(--bg-secondary)', padding: '0.2rem 0.375rem', borderRadius: 4 }}>

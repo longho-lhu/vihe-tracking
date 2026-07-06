@@ -10,6 +10,7 @@ import {
   TrendingUp, RefreshCw, ChevronRight,
 } from 'lucide-react'
 import Link from 'next/link'
+import { formatSpeed } from '@/lib/format'
 
 const LiveMap = dynamic(() => import('@/components/LiveMap'), { ssr: false })
 
@@ -178,7 +179,7 @@ export default function DashboardPage() {
                           {device.license_plate || device.mac_address}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {device.vehicle_type || 'Chưa cấu hình'} • {Math.round(device.last_speed || 0)} km/h
+                          {device.vehicle_type || 'Chưa cấu hình'} • {formatSpeed(device.last_speed)}
                         </div>
                       </div>
                       <ChevronRight size={14} color="var(--text-muted)" />
@@ -250,7 +251,7 @@ export default function DashboardPage() {
                     <td className="hide-mobile" style={{ color: 'var(--text-secondary)' }}>{device.vehicle_type || '—'}</td>
                     <td><StatusBadge status={device.status} /></td>
                     <td className="hide-mobile" style={{ color: '#60a5fa', fontWeight: 500 }}>
-                      {device.last_speed ? `${Math.round(device.last_speed)} km/h` : '—'}
+                      {device.last_speed != null ? formatSpeed(device.last_speed) : '—'}
                     </td>
                     <td className="hide-mobile" style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
                       {device.last_seen ? new Date(device.last_seen).toLocaleString('vi-VN') : '—'}

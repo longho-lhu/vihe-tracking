@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar'
 import HistoryMap from '@/components/HistoryMap'
 import { Calendar, Search, Route } from 'lucide-react'
 import { format, subHours } from 'date-fns'
+import { formatSpeed } from '@/lib/format'
 
 interface Device {
   id: string
@@ -189,7 +190,7 @@ export default function HistoryPage() {
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           {batch.positions?.length || 0} điểm
-                          {avgSpeed > 0 && ` • TB ${Math.round(avgSpeed)} km/h`}
+                          {avgSpeed >= 0.1 && ` • TB ${formatSpeed(avgSpeed)}`}
                         </div>
                       </div>
                     </div>

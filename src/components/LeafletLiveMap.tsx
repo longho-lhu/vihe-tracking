@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { formatSpeed } from '@/lib/format'
 
 interface Position {
   lat: number
@@ -86,12 +87,12 @@ export default function LeafletLiveMap({ position, deviceLabel }: LeafletLiveMap
 
       if (!markerRef.current) {
         markerRef.current = L.marker(latlng, { icon: vehicleIcon })
-          .bindPopup(`<b>${deviceLabel || 'Phương tiện'}</b><br>Tốc độ: ${Math.round(position.speed || 0)} km/h`)
+          .bindPopup(`<b>${deviceLabel || 'Phương tiện'}</b><br>Tốc độ: ${formatSpeed(position.speed)}`)
           .addTo(mapRef.current)
       } else {
         markerRef.current.setLatLng(latlng)
         markerRef.current.setPopupContent(
-          `<b>${deviceLabel || 'Phương tiện'}</b><br>Tốc độ: ${Math.round(position.speed || 0)} km/h`
+          `<b>${deviceLabel || 'Phương tiện'}</b><br>Tốc độ: ${formatSpeed(position.speed)}`
         )
       }
 

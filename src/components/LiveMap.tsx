@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { formatSpeed } from '@/lib/format'
 
 interface Position {
   lat: number
@@ -110,9 +111,9 @@ export default function LiveMap({ deviceId, initialPosition, deviceLabel }: Live
             {posLabel}
           </span>
         )}
-        {speed > 0 && (
+        {speed >= 0.1 && (
           <span style={{ color: '#60a5fa', fontWeight: 600 }}>
-            {speed.toFixed(1)} km/h
+            {formatSpeed(speed)}
           </span>
         )}
       </div>

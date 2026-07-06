@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic'
 import { ArrowLeft, Settings, MapPin, Clock, Wifi, Gauge, Navigation, Signal } from 'lucide-react'
 import Link from 'next/link'
 import { format, subHours } from 'date-fns'
+import { formatSpeed } from '@/lib/format'
 
 const LiveMap = dynamic(() => import('@/components/LiveMap'), { ssr: false })
 const HistoryMap = dynamic(() => import('@/components/HistoryMap'), { ssr: false })
@@ -146,7 +147,7 @@ export default function DeviceDetailPage({ params }: { params: Promise<{ id: str
           <InfoCard
             icon={<Gauge size={18} color="#34d399" />}
             label="Tốc độ"
-            value={device.last_speed ? `${device.last_speed.toFixed(1)} km/h` : '0 km/h'}
+            value={formatSpeed(device.last_speed)}
           />
           {/* GPS */}
           <InfoCard
