@@ -54,7 +54,27 @@ export default function DeviceDetailPage({ params }: { params: Promise<{ id: str
   const [showUpdateModal, setShowUpdateModal] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/devices/${id}`).then(r => r.json()).then(d => { setDevice(d); setLoading(false) })
+    let cancelled = false
+
+    async function fetchDevice() {
+      try {
+        const res = await fetch(`/api/devices/${id}`)
+        if (!res.ok) return
+        const d = await res.json()
+        if (!cancelled) {
+          setDevice(d)
+          setLoading(false)
+        }
+      } catch {}
+    }
+
+    fetchDevice()
+    // Poll every 3 seconds for live telemetry updates
+    const interval = setInterval(fetchDevice, 3000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [id])
 
   async function loadHistory() {

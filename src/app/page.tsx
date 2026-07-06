@@ -47,14 +47,22 @@ export default function DashboardPage() {
       fetch('/api/devices'),
       fetch('/api/notifications?limit=10'),
     ])
-    if (devRes.ok) setDevices(await devRes.json())
+    if (devRes.ok) {
+      const devs: Device[] = await devRes.json()
+      setDevices(devs)
+      // Keep selectedDevice in sync with latest data (position, speed, status)
+      setSelectedDevice(prev => {
+        if (!prev) return prev
+        return devs.find(d => d.id === prev.id) ?? prev
+      })
+    }
     if (notifRes.ok) setNotifications(await notifRes.json())
     setLoading(false)
   }, [])
 
   useEffect(() => {
     fetchData()
-    const interval = setInterval(fetchData, 15000)
+    const interval = setInterval(fetchData, 5000)   // Poll every 5s
     return () => clearInterval(interval)
   }, [fetchData])
 

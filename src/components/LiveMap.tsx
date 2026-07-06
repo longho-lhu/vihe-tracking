@@ -30,10 +30,24 @@ const MapComponent = dynamic(() => import('./LeafletLiveMap'), {
 })
 
 export default function LiveMap({ deviceId, initialPosition, deviceLabel }: LiveMapProps) {
+  // Start with initialPosition (from DB) so map shows immediately
   const [position, setPosition] = useState<Position | null>(initialPosition || null)
   const [connected, setConnected] = useState(false)
-  const [speed, setSpeed] = useState(0)
+  const [speed, setSpeed] = useState(initialPosition?.speed || 0)
+  const [posSource, setPosSource] = useState<string>('')
   const eventSourceRef = useRef<EventSource | null>(null)
+
+  // Update map when parent passes new initialPosition (from polling)
+  // Only update if we haven't received a live SSE update more recently
+  const lastSseUpdateRef = useRef<number>(0)
+  useEffect(() => {
+    if (!initialPosition) return
+    // Only apply if SSE hasn't updated in the last 10s (device not sending live)
+    if (Date.now() - lastSseUpdateRef.current > 10_000) {
+      setPosition(initialPosition)
+      setSpeed(initialPosition.speed || 0)
+    }
+  }, [initialPosition])
 
   useEffect(() => {
     const es = new EventSource(`/api/mqtt/stream?device_id=${deviceId}`)
@@ -44,9 +58,14 @@ export default function LiveMap({ deviceId, initialPosition, deviceLabel }: Live
     es.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-        if (data.lat && data.lng) {
-          setPosition({ lat: data.lat, lng: data.lng, speed: data.speed || 0, ts: Date.now() })
+        // Device sends "lon", normalize to "lng"
+        const lat = data.lat
+        const lng = data.lng ?? data.lon   // accept both field names
+        if (lat && lng && (data.pos_source !== 'none')) {
+          lastSseUpdateRef.current = Date.now()
+          setPosition({ lat, lng, speed: data.speed || 0, ts: Date.now() })
           setSpeed(data.speed || 0)
+          setPosSource(data.pos_source || '')
         }
       } catch {}
     }
@@ -59,6 +78,8 @@ export default function LiveMap({ deviceId, initialPosition, deviceLabel }: Live
       es.close()
     }
   }, [deviceId])
+
+  const posLabel = posSource === 'gps' ? 'GPS' : posSource === 'cell' ? 'Cell' : ''
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
@@ -77,10 +98,21 @@ export default function LiveMap({ deviceId, initialPosition, deviceLabel }: Live
           ...(connected ? { animation: 'pulse-green 2s infinite' } : {}),
           display: 'inline-block',
         }} />
-        <span>{connected ? 'Đang kết nối' : 'Mất kết nối'}</span>
+        <span>{connected ? 'Live' : 'Offline'}</span>
+        {posLabel && (
+          <span style={{
+            fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em',
+            padding: '0.1rem 0.4rem', borderRadius: 4,
+            background: posSource === 'gps' ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)',
+            color: posSource === 'gps' ? '#34d399' : '#fbbf24',
+            border: `1px solid ${posSource === 'gps' ? 'rgba(16,185,129,0.4)' : 'rgba(245,158,11,0.4)'}`,
+          }}>
+            {posLabel}
+          </span>
+        )}
         {speed > 0 && (
           <span style={{ color: '#60a5fa', fontWeight: 600 }}>
-            {Math.round(speed)} km/h
+            {speed.toFixed(1)} km/h
           </span>
         )}
       </div>

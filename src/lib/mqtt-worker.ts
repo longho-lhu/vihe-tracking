@@ -164,9 +164,10 @@ class MqttWorker {
       lastMessageTime: Date.now(),
     })
 
+    // Flush every 30 seconds
     const interval = setInterval(() => {
       this.saveBatch(deviceId)
-    }, 60 * 1000)
+    }, 30 * 1000)
 
     this.batchIntervals.set(deviceId, interval)
   }
@@ -227,6 +228,11 @@ class MqttWorker {
             pos_source: payload.pos_source,
             ts: Date.now(),
           })
+
+          // Flush immediately when batch reaches 30 points (≈30s at 1msg/s)
+          if (batch.positions.length >= 30) {
+            this.saveBatch(device.id)
+          }
         }
       }
 
